@@ -6,10 +6,12 @@
 
 ``` bash
 # install dependencies
-npm install
+yarn install
 
 # serve with hot reload at localhost:9080
 npm run dev
+
+
 
 # build electron application for production
 npm run build
@@ -22,6 +24,20 @@ npm test
 npm run lint
 
 ```
+
+---
+
+`npm run dev` would start following sub process:
+
+* it would start an express api server on `localhost:8081`, and the vue hot-reload-server for electron on `localhost:9080`.
+
+`npm run dev:web` would start following sub process:
+
+* it would start an express api server on `localhost:8081`, and the vue hot-reload-server for web on `localhost:8080`.
+
+---
+
+The build config in .electron-vue is incompatible with original [webpack boilerplate](http://vuejs-templates.github.io/webpack/). Since it was widely used among original vue project, I modified files in .electron-vue to make webpack config look familiar.
 
 ---
 

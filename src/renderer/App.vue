@@ -1,20 +1,21 @@
 <template>
-  <div id="app">
-    <landing-page></landing-page>
-  </div>
+<div id="app">
+  <!-- hello, world -->
+  <landing-page></landing-page>
+</div>
 </template>
 
 <script>
-  import LandingPage from '@/components/LandingPage'
+import LandingPage from '@/components/LandingPage'
 
-  export default {
-    name: 'electron-vue-demo',
-    components: {
-      LandingPage
-    }
+export default {
+  name: 'electron-vue-demo',
+  components: {
+    LandingPage
   }
+}
 </script>
 
 <style>
-  /* CSS */
+/* CSS */
 </style>
