@@ -30,7 +30,7 @@ function resolve(dir) {
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/webpack-configurations.html#white-listing-externals
  */
 // let whiteListedModules = ['vue']
-let rendererConfig = {
+let webConfig = {
   devtool: '#cheap-module-eval-source-map',
   entry: {
     web: resolve('src/renderer/main.js')
@@ -87,19 +87,6 @@ let rendererConfig = {
       }
     ]
   },
-  plugins: [
-    // new ExtractTextPlugin('styles.css'),
-    new HtmlWebpackPlugin({
-      filename: 'index.html',
-      template: resolve('src/index.ejs'),
-      minify: {
-        collapseWhitespace: true,
-        removeAttributeQuotes: true,
-        removeComments: true
-      },
-      nodeModules: false
-    })
-  ],
   output: {
     path: config.build.assetsRoot,
     filename: '[name].js',
@@ -110,7 +97,7 @@ let rendererConfig = {
 }
 
 /**
- * Adjust rendererConfig for development settings
+ * Adjust webConfig for development settings
  */
 let rendererDevConfig = {
   plugins: [
@@ -138,7 +125,7 @@ let rendererDevConfig = {
 }
 
 /**
- * Adjust rendererConfig for production settings
+ * Adjust webConfig for production settings
  */
 let rendererProdConfig = {
   devtool: config.build.productionSourceMap ? '#source-map' : false,
@@ -147,6 +134,11 @@ let rendererProdConfig = {
       sourceMap: config.build.productionSourceMap,
       extract: true
     })
+  },
+  output: {
+    path: config.build.web.assetsRoot,
+    filename: utils.assetsPath('js/[name].[chunkhash].js'),
+    chunkFilename: utils.assetsPath('js/[name].[chunkhash].js')
   },
   plugins: [
     new webpack.DefinePlugin({
@@ -168,6 +160,24 @@ let rendererProdConfig = {
       cssProcessorOptions: {
         safe: true
       }
+    }),
+    // generate dist index.html with correct asset hash for caching.
+    // you can customize output by editing /index.html
+    // see https://github.com/ampedandwired/html-webpack-plugin
+    new HtmlWebpackPlugin({
+      filename: process.env.NODE_ENV === 'testing' ?
+        'index.html' : config.build.web.index,
+      template: resolve('src/index.ejs'),
+      inject: true,
+      minify: {
+        removeComments: true,
+        collapseWhitespace: true,
+        removeAttributeQuotes: true
+        // more options:
+        // https://github.com/kangax/html-minifier#options-quick-reference
+      },
+      // necessary to consistently work with multiple chunks via CommonsChunkPlugin
+      chunksSortMode: 'dependency'
     }),
     // split vendor js into its own file
     new webpack.optimize.CommonsChunkPlugin({
@@ -194,8 +204,8 @@ let rendererProdConfig = {
       removeDebugger: true
     }),
     new CopyWebpackPlugin([{
-      from: path.join(__dirname, '../static'),
-      to: path.join(__dirname, '../dist/web/static'),
+      from: resolve('static'),
+      to: config.build.web.assetsRoot + '/static',
       ignore: ['.*']
     }]),
     new webpack.LoaderOptionsPlugin({
@@ -204,12 +214,34 @@ let rendererProdConfig = {
   ]
 }
 
-
 if (process.env.NODE_ENV !== 'production') {
-  rendererConfig = merge(rendererConfig, rendererDevConfig)
+  webConfig = merge(webConfig, rendererDevConfig)
 }
 if (process.env.NODE_ENV === 'production') {
-  rendererConfig = merge(rendererConfig, rendererProdConfig)
+  webConfig = merge(webConfig, rendererProdConfig)
+
+  if (config.build.web.productionGzip) {
+    var CompressionWebpackPlugin = require('compression-webpack-plugin')
+
+    webConfig.plugins.push(
+      new CompressionWebpackPlugin({
+        asset: '[path].gz[query]',
+        algorithm: 'gzip',
+        test: new RegExp(
+          '\\.(' +
+          config.build.web.productionGzipExtensions.join('|') +
+          ')$'
+        ),
+        threshold: 10240,
+        minRatio: 0.8
+      })
+    )
+  }
+
+  if (config.build.bundleAnalyzerReport) {
+    var BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
+    webConfig.plugins.push(new BundleAnalyzerPlugin())
+  }
 }
 
-module.exports = rendererConfig
+module.exports = webConfig

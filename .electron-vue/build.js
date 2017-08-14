@@ -23,13 +23,13 @@ if (process.env.BUILD_TARGET === 'clean') clean()
 else if (process.env.BUILD_TARGET === 'web') web()
 else build()
 
-function clean () {
+function clean() {
   del.sync(['build/*', '!build/icons', '!build/icons/icon.*'])
   console.log(`\n${doneLog}\n`)
   process.exit()
 }
 
-function build () {
+function build() {
   greeting()
 
   del.sync(['dist/electron/*', '!.gitkeep'])
@@ -70,7 +70,7 @@ function build () {
   })
 }
 
-function pack (config) {
+function pack(config) {
   return new Promise((resolve, reject) => {
     webpack(config, (err, stats) => {
       if (err) reject(err.stack || err)
@@ -78,40 +78,53 @@ function pack (config) {
         let err = ''
 
         stats.toString({
-          chunks: false,
-          colors: true
-        })
-        .split(/\r?\n/)
-        .forEach(line => {
-          err += `    ${line}\n`
-        })
+            colors: true,
+            modules: false,
+            children: false,
+            chunks: false,
+            chunkModules: false
+          })
+          .split(/\r?\n/)
+          .forEach(line => {
+            err += `    ${line}\n`
+          })
 
         reject(err)
       } else {
         resolve(stats.toString({
+          colors: true,
+          modules: false,
+          children: false,
           chunks: false,
-          colors: true
+          chunkModules: false
         }))
       }
     })
   })
 }
 
-function web () {
+function web() {
   del.sync(['dist/web/*', '!.gitkeep'])
   webpack(webConfig, (err, stats) => {
     if (err || stats.hasErrors()) console.log(err)
 
     console.log(stats.toString({
+      colors: true,
+      modules: false,
+      children: false,
       chunks: false,
-      colors: true
+      chunkModules: false
     }))
 
-    process.exit()
+    console.log(chalk.cyan('  Build complete.\n'))
+    console.log(chalk.yellow(
+      '  Tip: built files are meant to be served over an HTTP server.\n' +
+      '  Opening index.html over file:// won\'t work.\n'
+    ))
   })
 }
 
-function greeting () {
+function greeting() {
   const cols = process.stdout.columns
   let text = ''
 

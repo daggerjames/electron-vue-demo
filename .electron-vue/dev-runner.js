@@ -8,7 +8,7 @@ const express = require('express')
 const { say } = require('cfonts')
 const { spawn } = require('child_process')
 const webpack = require('webpack')
-const proxyMiddleware = require('http-proxy-middleware')
+// const proxyMiddleware = require('http-proxy-middleware')
 const WebpackDevServer = require('webpack-dev-server')
 const webpackDevMiddleware = require('webpack-dev-middleware')
 const webpackHotMiddleware = require('webpack-hot-middleware')
@@ -93,7 +93,7 @@ function startWeb() {
   var autoOpenBrowser = !!config.dev.autoOpenBrowser
   // Define HTTP proxies to your custom API backend
   // https://github.com/chimurai/http-proxy-middleware
-  var proxyTable = config.dev.proxyTable
+  // var proxyTable = config.dev.proxyTable
   var compiler = webpack(webpackConfig)
   var app = express()
 
@@ -115,13 +115,13 @@ function startWeb() {
   })
 
   // proxy api requests
-  Object.keys(proxyTable).forEach(function (context) {
-    var options = proxyTable[context]
-    if (typeof options === 'string') {
-      options = { target: options }
-    }
-    app.use(proxyMiddleware(options.filter || context, options))
-  })
+  // Object.keys(proxyTable).forEach(function (context) {
+  //   var options = proxyTable[context]
+  //   if (typeof options === 'string') {
+  //     options = { target: options }
+  //   }
+  //   app.use(proxyMiddleware(options.filter || context, options))
+  // })
 
   // handle fallback for HTML5 history API
   app.use(require('connect-history-api-fallback')())

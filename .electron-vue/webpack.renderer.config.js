@@ -157,6 +157,11 @@ let rendererProdConfig = {
       extract: true
     })
   },
+  output: {
+    path: config.build.electron.assetsRoot,
+    filename: utils.assetsPath('js/[name].[chunkhash].js'),
+    chunkFilename: utils.assetsPath('js/[name].[chunkhash].js')
+  },
   plugins: [
     new webpack.DefinePlugin({
       'process.env': config.build.env
@@ -219,6 +224,29 @@ if (process.env.NODE_ENV !== 'production') {
 }
 if (process.env.NODE_ENV === 'production') {
   rendererConfig = merge(rendererConfig, rendererProdConfig)
+
+  if (config.build.electron.productionGzip) {
+    var CompressionWebpackPlugin = require('compression-webpack-plugin')
+
+    rendererConfig.plugins.push(
+      new CompressionWebpackPlugin({
+        asset: '[path].gz[query]',
+        algorithm: 'gzip',
+        test: new RegExp(
+          '\\.(' +
+          config.build.electron.productionGzipExtensions.join('|') +
+          ')$'
+        ),
+        threshold: 10240,
+        minRatio: 0.8
+      })
+    )
+  }
+
+  if (config.build.bundleAnalyzerReport) {
+    var BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
+    rendererConfig.plugins.push(new BundleAnalyzerPlugin())
+  }
 }
 
 module.exports = rendererConfig
